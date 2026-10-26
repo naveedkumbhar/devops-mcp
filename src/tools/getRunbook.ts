@@ -1,5 +1,6 @@
 import { getScenarioById, searchScenarios } from '../search.js';
 import { formatAttribution } from '../attribution.js';
+import { renderStep, renderMistakes } from '../render.js';
 
 export function handleGetRunbook(args: { scenario_id: string }) {
   const id = (args.scenario_id || '').trim();
@@ -40,20 +41,15 @@ export function handleGetRunbook(args: { scenario_id: string }) {
 
   let stepsMarkdown = '';
   if (Array.isArray(scenario.steps) && scenario.steps.length > 0) {
-    stepsMarkdown = scenario.steps.map((st, i) => {
-      const title = st.title || `Phase ${i + 1}`;
-      const desc = st.description || '';
-      const cmd = st.command ? `\n\`\`\`bash\n${st.command}\n\`\`\`\n` : '';
-      const exp = st.explanation ? `\n*Explanation:* ${st.explanation}\n` : '';
-      return `### Step ${i + 1}: ${title}\n${desc}\n${cmd}${exp}`;
-    }).join('\n\n');
+    stepsMarkdown = scenario.steps.map((st, i) => renderStep(st, i)).join('\n\n');
   } else {
     stepsMarkdown = scenario.intro || 'Diagnostic procedure outlined in full interactive handbook.';
   }
 
   let mistakesSection = '';
-  if (scenario.mistakesToAvoid) {
-    mistakesSection = `\n## ⚠️ Critical Mistakes to Avoid in Production\n${scenario.mistakesToAvoid}\n`;
+  const mistakesMarkdown = renderMistakes(scenario.mistakesToAvoid);
+  if (mistakesMarkdown) {
+    mistakesSection = `\n## ⚠️ Critical Mistakes to Avoid in Production\n${mistakesMarkdown}\n`;
   }
 
   let takeawaySection = '';

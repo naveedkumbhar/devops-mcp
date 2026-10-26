@@ -19,7 +19,10 @@ export interface Scenario {
     }>;
     keyTakeaway: string;
     elevatorPitch: string;
-    mistakesToAvoid: string;
+    mistakesToAvoid: string | Array<{
+        mistake?: string;
+        why?: string;
+    }>;
 }
 export declare function initSearchIndex(): {
     total: number;

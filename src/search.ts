@@ -24,7 +24,7 @@ export interface Scenario {
   }>;
   keyTakeaway: string;
   elevatorPitch: string;
-  mistakesToAvoid: string;
+  mistakesToAvoid: string | Array<{ mistake?: string; why?: string }>;
 }
 
 const __filename = fileURLToPath(import.meta.url);
