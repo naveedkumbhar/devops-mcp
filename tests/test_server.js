@@ -82,8 +82,8 @@ async function runTests() {
   for (const t of toolsRes.tools) {
     console.log(`      - ${t.name}: ${t.description.slice(0, 70)}...`);
   }
-  if (toolsRes.tools.length !== 6) {
-    throw new Error(`Expected 6 tools, found ${toolsRes.tools.length}`);
+  if (toolsRes.tools.length !== 7) {
+    throw new Error(`Expected 7 tools, found ${toolsRes.tools.length}`);
   }
 
   // 3. Tool: search_incident_scenarios
@@ -106,6 +106,17 @@ async function runTests() {
   console.log('   Output snippet:\n' + runbookRes.content[0].text.slice(0, 250) + '...\n');
   if (!runbookRes.content[0].text.includes('Diagnostic Order')) {
     throw new Error('Runbook steps missing');
+  }
+
+  // 4b. Tool: decode_error
+  console.log('4b. Testing tool [decode_error] (error: "137")...');
+  const decodeRes = await sendRequest('tools/call', {
+    name: 'decode_error',
+    arguments: { error: '137' }
+  });
+  console.log('   Output snippet:\n' + decodeRes.content[0].text.slice(0, 250) + '...\n');
+  if (!decodeRes.content[0].text.includes('SIGKILL') || !decodeRes.content[0].text.includes('Diagnose')) {
+    throw new Error('decode_error output incomplete');
   }
 
   // 5. Tool: get_interview_elevator_pitch

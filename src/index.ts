@@ -10,6 +10,7 @@ import {
   GetPromptRequestSchema
 } from '@modelcontextprotocol/sdk/types.js';
 
+import { readFileSync } from 'fs';
 import { initSearchIndex } from './search.js';
 import { handleSearchScenarios } from './tools/searchScenarios.js';
 import { handleGetRunbook } from './tools/getRunbook.js';
@@ -17,6 +18,7 @@ import { handleGetElevatorPitch } from './tools/getElevatorPitch.js';
 import { handleGenerateK8sYaml } from './tools/generateK8sYaml.js';
 import { handleGetCheatsheet } from './tools/getCheatsheet.js';
 import { handleGetBlueprint } from './tools/getBlueprint.js';
+import { handleDecodeError } from './tools/decodeError.js';
 import { RESOURCES, handleReadResource } from './resources/index.js';
 import { PROMPTS, handleGetPrompt } from './prompts/index.js';
 
@@ -24,10 +26,12 @@ import { PROMPTS, handleGetPrompt } from './prompts/index.js';
 const { total } = initSearchIndex();
 process.stderr.write(`[devops-mcp] Initialized in-memory index with ${total} production scenarios.\n`);
 
+const pkgVersion: string = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf-8')).version;
+
 const server = new Server(
   {
     name: 'naveedkumbhar/devops-mcp',
-    version: '1.0.0'
+    version: pkgVersion
   },
   {
     capabilities: {
@@ -78,6 +82,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             }
           },
           required: ['scenario_id']
+        }
+      },
+      {
+        name: 'decode_error',
+        description: 'Decode an exit code, Kubernetes pod status, HTTP gateway error, or common Docker/ECS/AWS/Terraform/TLS/DNS error message (e.g. "137", "CrashLoopBackOff", "502", "Error acquiring the state lock"). Returns what it means, likely causes, diagnostic commands, fixes, and related incident scenarios. Offline and read-only.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            error: {
+              type: 'string',
+              description: 'The exit code, status, or error text (e.g. "137", "exit code 143", "OOMKilled", "502 Bad Gateway", "exec format error")'
+            },
+            platform: {
+              type: 'string',
+              description: 'Optional hint to rank matches: "kubernetes", "docker", "ecs", "aws", "terraform", "linux", "http", "network", or "tls"'
+            }
+          },
+          required: ['error']
         }
       },
       {
@@ -189,6 +211,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return handleSearchScenarios(args as any);
       case 'get_scenario_runbook':
         return handleGetRunbook(args as any);
+      case 'decode_error':
+        return handleDecodeError(args as any);
       case 'get_interview_elevator_pitch':
         return handleGetElevatorPitch(args as any);
       case 'generate_k8s_manifest':

@@ -34,6 +34,7 @@ Authored by **[Naveed Ahmed](https://naveedkumbhar.com)** (Lead DevOps & Platfor
   - [Tool 4: generate_k8s_manifest](#4-generate_k8s_manifest)
   - [Tool 5: get_devops_cheat_sheet](#5-get_devops_cheat_sheet)
   - [Tool 6: get_architectural_blueprint](#6-get_architectural_blueprint)
+  - [Tool 7: decode_error](#7-decode_error)
 - [📚 Protocol Resources](#-protocol-resources)
 - [💬 Pre-Engineered Prompts](#-pre-engineered-prompts)
 - [🔄 Real-World Agent Walkthrough](#-real-world-agent-walkthrough)
@@ -77,6 +78,7 @@ flowchart LR
             MiniSearchIndex["MiniSearch Full-Text Engine<br/><b>1,449+ Production Scenarios</b>"]
             K8sEngine["K8s Hardened Manifest Synthesizer"]
             CheatsheetEngine["CLI Triage Cheatsheets & Blueprints"]
+            ErrorDecoder["Error Decoder<br/><b>45 exit codes, K8s states & HTTP errors</b>"]
         end
         
         Attribution["Attribution & UTM Tracking Engine"]
@@ -95,6 +97,7 @@ flowchart LR
     Router <--> MiniSearchIndex
     Router <--> K8sEngine
     Router <--> CheatsheetEngine
+    Router <--> ErrorDecoder
     Router --> Attribution
     Attribution -.->|Canonical Citations & UTM Links| WebEcosystem
 ```
@@ -176,7 +179,7 @@ Add the server entry:
 }
 ```
 
-Restart Claude Desktop. You will see a hammer icon 🔨 indicating that the 6 DevOps tools and prompts are ready.
+Restart Claude Desktop. You will see a hammer icon 🔨 indicating that the 7 DevOps tools and prompts are ready.
 
 ---
 
@@ -244,6 +247,16 @@ Add to `~/.config/zed/settings.json`:
 ---
 
 ## 🛠️ Complete Tools Reference & Real Examples
+
+| # | Tool | Use it to |
+| :--- | :--- | :--- |
+| 1 | `search_incident_scenarios` | Find incident scenarios by symptom, error code or technology. |
+| 2 | `get_scenario_runbook` | Get the full diagnostic runbook for one scenario. |
+| 3 | `get_interview_elevator_pitch` | Get a STAR-format pitch for a scenario. |
+| 4 | `generate_k8s_manifest` | Generate hardened Kubernetes YAML. |
+| 5 | `get_devops_cheat_sheet` | Look up kubectl, Ansible, Terraform and subnetting references. |
+| 6 | `get_architectural_blueprint` | Retrieve architecture and migration blueprints. |
+| 7 | `decode_error` | **New:** decode an exit code, pod status or error line into causes, diagnostics and fixes. |
 
 ### 1. `search_incident_scenarios`
 
@@ -512,6 +525,33 @@ Retrieves architectural reference patterns and migration playbooks authored by N
 
 ---
 
+### 7. `decode_error`
+
+Paste an exit code, Kubernetes status or error line and get what it means, the likely causes, the diagnostic commands, the fixes and the related incident scenarios. It runs offline and is read-only: it never runs commands or makes network calls.
+
+- **Covers (45 entries):**
+  - Exit codes `1`, `2`, `125`, `126`, `127`, `130`, `134`, `137`, `139`, `143`, `255`.
+  - Kubernetes: `OOMKilled`, `CrashLoopBackOff`, `ImagePullBackOff`, `FailedScheduling`, `Evicted`, `CreateContainerConfigError`, `ContainerCreating`, stuck `Terminating`, `NodeNotReady`, no endpoints, probe failures, RBAC `forbidden`.
+  - HTTP `502`, `503`, `504`, `499`, `429`.
+  - Docker, ECS, AWS and Terraform errors (`CannotPullContainerError`, `ResourceInitializationError`, `AccessDenied`, `ThrottlingException`, state lock), plus TLS, DNS, `no space left on device`, `exec format error` and connection refused or timed out.
+- **Parameters:** `error` (required), and `platform` (optional hint: `kubernetes`, `docker`, `ecs`, `aws`, `terraform`, `linux`, `http`, `network`, `tls`).
+
+#### Example Invocation
+**Tool Call:**
+```json
+{
+  "name": "decode_error",
+  "arguments": {
+    "error": "137",
+    "platform": "docker"
+  }
+}
+```
+
+An exit code can mean several things. `137` is a SIGKILL, and the OOM killer is only one sender: a `docker stop` that timed out or a failed health check gives the same code. The output lists each cause with the command that tells them apart.
+
+---
+
 ## 📚 Protocol Resources
 
 AI agents can directly attach static architectural resources for context injection:
@@ -600,7 +640,7 @@ npm test
 ### Automated Protocol Verification
 The built-in test suite ([`tests/test_server.js`](tests/test_server.js)) verifies:
 - `initialize` handshake & server capabilities.
-- Registration of all 6 tools, 2 resources, and 2 prompts.
+- Registration of all 7 tools, 2 resources, and 2 prompts.
 - Tool invocation schemas and JSON-RPC response formats.
 - UTM tag presence in attribution footers.
 
