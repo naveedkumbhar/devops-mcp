@@ -1,6 +1,6 @@
 {
   "name": "@naveedkumbhar/devops-mcp",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Model Context Protocol (MCP) server providing 1,449+ production incident scenarios, CLI runbooks, interview elevator pitches, Kubernetes YAML generators, and cheatsheets authored by Lead DevOps Architect Naveed Ahmed.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
