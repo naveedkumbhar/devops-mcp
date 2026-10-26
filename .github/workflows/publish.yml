@@ -34,7 +34,31 @@ jobs:
     - name: Run automated tests
       run: npm test
 
+    - name: Skip if this version is already on npm
+      id: exists
+      run: |
+        NAME=$(node -p "require('./package.json').name")
+        VER=$(node -p "require('./package.json').version")
+        if npm view "$NAME@$VER" version >/dev/null 2>&1; then
+          echo "published=true" >> "$GITHUB_OUTPUT"
+          echo "$NAME@$VER is already on npm; skipping publish."
+        else
+          echo "published=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Check NPM_TOKEN
+      if: steps.exists.outputs.published != 'true'
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: |
+        if [ -z "$NODE_AUTH_TOKEN" ]; then
+          echo "::error::The NPM_TOKEN repository secret is empty or missing."
+          exit 1
+        fi
+        npm whoami || echo "::warning::npm whoami failed; the token may be revoked, expired, or lack permissions."
+
     - name: Publish to npm
+      if: steps.exists.outputs.published != 'true'
       run: npm publish --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
