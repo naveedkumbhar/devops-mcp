@@ -1,0 +1,53 @@
+{
+  "name": "@naveedkumbhar/devops-mcp",
+  "version": "1.0.0",
+  "description": "Model Context Protocol (MCP) server providing 1,449+ production incident scenarios, CLI runbooks, interview elevator pitches, Kubernetes YAML generators, and cheatsheets authored by Lead DevOps Architect Naveed Ahmed.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "devops-mcp": "./dist/index.js",
+    "naveed-devops-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc && cp src/data/scenarios.json dist/data/scenarios.json",
+    "prepare": "npm run build",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "devops",
+    "sre",
+    "kubernetes",
+    "aws",
+    "terraform",
+    "runbooks",
+    "interview-prep",
+    "claude-code",
+    "cursor",
+    "windsurf"
+  ],
+  "author": "Naveed Ahmed <devops@naveedkumbhar.com> (https://naveedkumbhar.com)",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.5.0",
+    "minisearch": "^7.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
