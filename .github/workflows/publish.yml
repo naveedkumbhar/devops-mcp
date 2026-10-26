@@ -57,6 +57,9 @@ jobs:
           echo "::error::The NPM_TOKEN repository secret is empty or missing."
           exit 1
         fi
+        echo "Token length: ${#NODE_AUTH_TOKEN}, starts with: ${NODE_AUTH_TOKEN:0:4}, has whitespace: $(printf '%s' "$NODE_AUTH_TOKEN" | grep -c '[[:space:]]')"
+        echo "Registry: $(npm config get registry)"
+        echo "npmrc in use has an authToken line: $(grep -c ':_authToken=' "$NPM_CONFIG_USERCONFIG" 2>/dev/null || echo 0)"
         if ! npm whoami; then
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
             echo "::error::npm whoami failed: the NPM_TOKEN secret is revoked, expired, mistyped, or lacks permissions."
